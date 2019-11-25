@@ -42,11 +42,9 @@ def errorfunc(w, x, y):
     return 0 if sum(w[i]*x[i] for i in range(5))*y > 0 else 1
 
 
-def sgd1(sigma, n):
+def sgd1(trainSet, n):
     wset = [[0, 0, 0, 0, 0]]
     w = [0, 0, 0, 0, 0]
-    uset = generateU(sigma, n)
-    trainSet = generateSet1(uset)
     for i in range(n):
         z = trainSet[i] + [1]
         y = -1 if i < n/2 else 1
@@ -70,11 +68,9 @@ def sgd1(sigma, n):
     return Ws
 
 
-def sgd2(sigma, n):
+def sgd2(trainSet, n):
     wset = [[0, 0, 0, 0, 0]]
     w = [0, 0, 0, 0, 0]
-    uset = generateU(sigma, n)
-    trainSet = generateSet2(uset)
     for i in range(n):
         z = trainSet[i] + [1]
         y = -1 if i < n / 2 else 1
@@ -93,6 +89,7 @@ def sgd2(sigma, n):
             setIndex += each[i]
         Ws.append(setIndex / len(wset))
     return Ws
+
 
 def test(w, testSet):
     lossSet, errorSet = [], []
