@@ -2,7 +2,7 @@ import numpy as np
 from statistics import mean
 from math import sqrt
 
-sigma, n, N, t, alpha = [.05, .3], [50, 100, 500, 1000], 400, 30, 0.01
+sigmas, ns, N, t, alpha = [.05, .3], [50, 100, 500, 1000], 400, 30, 0.01
 
 def generateU(sigma, n):
     return [np.random.normal(-0.25, sigma, 4).tolist() for _ in range(n//2)] + \
@@ -85,10 +85,15 @@ def test(w, testSet):
     return [loss, error]
 
 
-# if __name__ == "__main__":
-#     # print("#"*107)
-#     # print(" "*47, "|          Logistic loss            |  Classification error")
-#     # print("Scenario |  sigma  | n | N |  #trials  |  Mean  |  Std Dev  |  Min  |  Excess Risk  |   Mean   |   Std Dev")
-#     #
-#     for each in sigma:
-#         print("sigma")
+if __name__ == "__main__":
+    # print("#"*107)
+    # print(" "*47, "|          Logistic loss            |  Classification error")
+    # print("Scenario |  sigma  | n | N |  #trials  |  Mean  |  Std Dev  |  Min  |  Excess Risk  |   Mean   |   Std Dev")
+    for sigma in sigmas:
+        print("sigma: ", sigma)
+        testU = generateU(sigma, N)
+        testSet1, testSet2 = generateSet1(testU), generateSet2(testU)
+        for _ in range(30):
+            trainU = generateU(sigma, 1000)
+            trainSet1, trainSet2 = generateSet1(trainU), generateSet2(trainU)
+            
