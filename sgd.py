@@ -70,6 +70,30 @@ def sgd1(sigma, n):
     return Ws
 
 
+def sgd2(sigma, n):
+    wset = [[0, 0, 0, 0, 0]]
+    w = [0, 0, 0, 0, 0]
+    uset = generateU(sigma, n)
+    trainSet = generateSet2(uset)
+    for i in range(n):
+        z = trainSet[i] + [1]
+        y = -1 if i < n / 2 else 1
+        param = -y * np.exp(-y * sum(w[i] * z[i] for i in range(5))) \
+                / (1 + np.exp(-y * sum(w[i] * z[i] for i in range(5))))
+        G = [param * z[i] for i in range(5)]
+        temp = [w[i] - alpha * G[i] for i in range(5)]
+        euclidean = sqrt(sum(temp[i] ** 2 for i in range(5)))
+        if euclidean <= 1: w = temp
+        else: w = [temp[i]/euclidean for i in range(5)]
+        wset.append(w)
+    Ws = []
+    for i in range(5):
+        setIndex = 0
+        for each in wset:
+            setIndex += each[i]
+        Ws.append(setIndex / len(wset))
+    return Ws
+
 def test(w, testSet):
     lossSet, errorSet = [], []
     for i, each in enumerate(testSet):
@@ -80,4 +104,3 @@ def test(w, testSet):
     loss, error = mean(lossSet), mean(errorSet)
     return [loss, error]
 
-print(sgd1(0.3, 1000))
