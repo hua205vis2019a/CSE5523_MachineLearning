@@ -3,17 +3,17 @@ from statistics import mean
 from math import sqrt
 
 
-sigma, n, N, t = [.05, .3], [50, 100, 500, 1000], 400, 30
+sigma, n, N, t, alpha = [.05, .3], [50, 100, 500, 1000], 400, 30, 0.01
 
 def generateU(sigma, n):
-    negU = [np.random.normal(-0.25, sigma, 4).tolist() for _ in range(n/2)]
-    posU = [np.random.normal(0.25, sigma, 4).tolist() for _ in range(n/2)]
+    negU = [np.random.normal(-0.25, sigma, 4).tolist() for _ in range(n//2)]
+    posU = [np.random.normal(0.25, sigma, 4).tolist() for _ in range(n//2)]
     return negU + posU
 
 
-def generateSet1(u):
+def generateSet1(uset):
     trainSet = []
-    for each in u:
+    for each in uset:
         example = []
         for k in each:
             if -1 <= k <= 1: example.append(k)
@@ -23,9 +23,9 @@ def generateSet1(u):
     return trainSet
 
 
-def generateSet2(u):
+def generateSet2(uset):
     trainSet = []
-    for each in u:
+    for each in uset:
         euclidean = sqrt(sum(each[i] ** 2 for i in range(4)))
         if euclidean <= 1: trainSet.append(each)
         else: trainSet.append([each[i]/euclidean for i in range(4)])
@@ -42,8 +42,34 @@ def errorfunc(w, x, y):
     return 0 if sum(w[i]*x[i] for i in range(5))*y > 0 else 1
 
 
-def sgd1(n):
+def sgd1(sigma, n):
+    wset = [[0, 0, 0, 0, 0]]
     w = [0, 0, 0, 0, 0]
+    uset = generateU(sigma, n)
+    print(uset)
+    trainSet = generateSet1(uset)
+    print(trainSet)
+    for i in range(n):
+        z = trainSet[i] + [1]
+        y = -1 if i < n/2 else 1
+        param = -y * np.exp(-y * sum(w[i]*z[i] for i in range(5))) \
+                / (1 + np.exp(-y * sum(w[i]*z[i] for i in range(5))))
+        G = [param * z[i] for i in range(5)]
+        temp = [w[i] - alpha * G[i] for i in range(5)]
+        wn = []
+        for i, k in enumerate(temp):
+            if -1 <= k <= 1: wn.append(w[i])
+            elif k < -1: wn.append(-1)
+            else: wn.append(1)
+        w = wn
+        wset.append(w)
+    Ws = []
+    for i in range(5):
+        setIndex = 0
+        for each in wset:
+            setIndex += each[i]
+        Ws.append(setIndex/len(wset))
+    return Ws
 
 
 def test(w, testSet):
@@ -56,4 +82,4 @@ def test(w, testSet):
     loss, error = mean(lossSet), mean(errorSet)
     return [loss, error]
 
-
+print(sgd1(0.3, 1000))
