@@ -102,6 +102,6 @@ def test(w, testSet):
     return [loss, error]
 
 if __name__ == "__main__":
-    print("#"*100)
+    print("#"*107)
     print(" "*47, "|          Logistic loss            |  Classification error")
-    print("Scenario |  sigma  | n | N |  #trials  |  Mean  |  Std Dev  |  Min  |  Excess Risk  |  Mean  |  Std Dev")
+    print("Scenario |  sigma  | n | N |  #trials  |  Mean  |  Std Dev  |  Min  |  Excess Risk  |   Mean   |   Std Dev")
