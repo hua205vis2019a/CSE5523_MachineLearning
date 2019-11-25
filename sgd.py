@@ -46,9 +46,7 @@ def sgd1(sigma, n):
     wset = [[0, 0, 0, 0, 0]]
     w = [0, 0, 0, 0, 0]
     uset = generateU(sigma, n)
-    print(uset)
     trainSet = generateSet1(uset)
-    print(trainSet)
     for i in range(n):
         z = trainSet[i] + [1]
         y = -1 if i < n/2 else 1
@@ -58,7 +56,7 @@ def sgd1(sigma, n):
         temp = [w[i] - alpha * G[i] for i in range(5)]
         wn = []
         for i, k in enumerate(temp):
-            if -1 <= k <= 1: wn.append(w[i])
+            if -1 <= k <= 1: wn.append(temp[i])
             elif k < -1: wn.append(-1)
             else: wn.append(1)
         w = wn
