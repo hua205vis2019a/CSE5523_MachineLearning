@@ -1,5 +1,5 @@
 import numpy as np
-from statistics import mean
+from statistics import mean, stdev
 from math import sqrt
 
 sigmas, ns, N, t, alpha = [.05, .3], [50, 100, 500, 1000], 400, 30, 0.01
@@ -93,7 +93,47 @@ if __name__ == "__main__":
         print("sigma: ", sigma)
         testU = generateU(sigma, N)
         testSet1, testSet2 = generateSet1(testU), generateSet2(testU)
+        loss_error_1set, loss_error_2set = [[], [], [], []], [[], [], [], []]
         for _ in range(30):
             trainU = generateU(sigma, 1000)
             trainSet1, trainSet2 = generateSet1(trainU), generateSet2(trainU)
-            
+            Ws_1_50 = sgd(euclidean1, trainSet1, 50)
+            for i in range(4):
+                Ws1 = sgd(euclidean1, trainSet1[:ns[i]], ns[i])
+                Ws2 = sgd(euclidean2, trainSet1[:ns[i]], ns[i])
+                loss_error_1set[i].append(test(Ws1, testSet1))
+                loss_error_2set[i].append(test(Ws2, testSet2))
+        for i in range(4):
+            meanloss1 = mean(each[0] for each in loss_error_1set[i])
+            stdloss1 = stdev(each[0] for each in loss_error_1set[i])
+            minloss1 = min(each[0] for each in loss_error_1set[i])
+            risk1 = meanloss1 - minloss1
+            meanerror1 = mean(each[1] for each in loss_error_1set[i])
+            stderror1 = stdev(each[1] for each in loss_error_1set[i])
+
+            meanloss2 = mean(each[0] for each in loss_error_2set[i])
+            stdloss2 = stdev(each[0] for each in loss_error_2set[i])
+            minloss2 = min(each[0] for each in loss_error_2set[i])
+            risk2 = meanloss2 - minloss2
+            meanerror2 = mean(each[1] for each in loss_error_2set[i])
+            stderror2 = stdev(each[1] for each in loss_error_2set[i])
+
+            print("-"*150)
+            print("n = ", ns[i])
+            print("Scenario 1")
+            print("Logistic loss")
+            print("Mean: ", meanloss1, "| Std Dev: ", stdloss1, "| Min: ", minloss1, "| Excess Risk: ", risk1)
+            print("Classification error")
+            print("Mean: ", meanerror1, "| Std Dev: ", stderror1)
+            print()
+            print("Scenario 2")
+            print("Logistic loss")
+            print("Mean: ", meanloss2, "| Std Dev: ", stdloss2, "| Min: ", minloss2, "| Excess Risk: ", risk2)
+            print("Classification error")
+            print("Mean: ", meanerror2, "| Std Dev: ", stderror2)
+        print()
+        print("*"*150)
+        print()
+
+
+
