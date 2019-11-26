@@ -52,7 +52,8 @@ def generateSet2(uset):
     trainSet = []
     for each in uset:
         # Euclidean projection for Scenario 2
-        # if the Euclidean norm of the vector is less and equal to 1, in the convex, keep consistent
+        # if the Euclidean norm of the vector is less and equal to 1,
+        #                              in the convex, keep consistent
         # otherwise, shorten it to 1
         euclidean = sqrt(sum(each[i] ** 2 for i in range(1, 5)))
         if euclidean <= 1: trainSet.append(each)
@@ -72,7 +73,7 @@ def lossfunc(w, x, y):
 
 
 def errorfunc(w, x, y):
-    """Binary classification error (the risk under '0-1' loss): 1(sign(<w,(x,1)>) != y)
+    """Binary classification error: 1(sign(<w,(x,1)>) != y)
     :param w: Ws
     :param x: test set
     :param y: label
@@ -121,7 +122,8 @@ def sgd(euclidean, trainSet, n):
         # generate z and y
         z = trainSet[i][1:] + [1]
         y = trainSet[i][0]
-        # the parameter of partial derivative with respect to each dimension divides the quantity of that dimension
+        # the parameter of partial derivative with respect to each dimension
+        # divides the quantity of that dimension
         param = -y * np.exp(-y * sum(w[i]*z[i] for i in range(5))) \
                 / (1 + np.exp(-y * sum(w[i]*z[i] for i in range(5))))
         # generate Gt
@@ -140,7 +142,7 @@ def sgd(euclidean, trainSet, n):
 
 
 def test(w, testSet):
-    """Test Ws with test set and output the logistic loss and binary classification error
+    """Test Ws with test set and output the logistic loss and classification error
     :param w: Ws
     :param testSet: test set
     :return: [logistic loss, binary classification error]
@@ -180,7 +182,7 @@ if __name__ == "__main__":
             for i in range(4):
                 # run SGD algorithm
                 Ws1 = sgd(euclidean1, trainSet1[:ns[i]], ns[i])
-                Ws2 = sgd(euclidean2, trainSet1[:ns[i]], ns[i])
+                Ws2 = sgd(euclidean2, trainSet2[:ns[i]], ns[i])
                 # test Ws and output loss and error
                 loss_error_1set[i].append(test(Ws1, testSet1))
                 loss_error_2set[i].append(test(Ws2, testSet2))
