@@ -5,7 +5,7 @@ from random import shuffle
 
 
 # sigma, n, N, iteration, alpha
-sigmas, ns, N, t, alpha = [.05, .3], [50, 100, 500, 1000], 400, 30, 0.01
+d, mu, sigmas, ns, N, trial, alpha = 5, [-.25, .25],[.05, .3], [50, 100, 500, 1000], 400, 30, 0.01
 
 
 def generateU(sigma, n):
@@ -16,8 +16,8 @@ def generateU(sigma, n):
     """
     # first n/2 vectors based on y = -1, mu = [-1/4, -1/4, -1/4, -1/4], sigma
     # last n/2 vectors based on y = 1, mu = [1/4, 1/4, 1/4, 1/4], sigma
-    uset = [[-1] + np.random.normal(-0.25, sigma, 4).tolist() for _ in range(n//2)] + \
-           [[1] + np.random.normal(0.25, sigma, 4).tolist() for _ in range(n//2)]
+    uset = [[-1] + np.random.normal(mu[0], sigma, d-1).tolist() for _ in range(n//2)] + \
+           [[1] + np.random.normal(mu[1], sigma, d-1).tolist() for _ in range(n//2)]
     # shuffle the set to make them with label 1 (or -1) not grouping together
     shuffle(uset)
     return uset
@@ -55,9 +55,9 @@ def generateSet2(uset):
         # if the Euclidean norm of the vector is less and equal to 1,
         #                              in the convex, keep consistent
         # otherwise, shorten it to 1
-        euclidean = sqrt(sum(each[i] ** 2 for i in range(1, 5)))
+        euclidean = sqrt(sum(each[i] ** 2 for i in range(1, d)))
         if euclidean <= 1: trainSet.append(each)
-        else: trainSet.append([each[0]] + [each[i]/euclidean for i in range(1, 5)])
+        else: trainSet.append([each[0]] + [each[i]/euclidean for i in range(1, d)])
     return trainSet
 
 
@@ -69,7 +69,7 @@ def lossfunc(w, x, y):
     :return: logistic loss
     """
     x = x + [1]
-    return np.log(1 + np.exp(-y*sum(w[i]*x[i] for i in range(5))))
+    return np.log(1 + np.exp(-y*sum(w[i]*x[i] for i in range(d))))
 
 
 def errorfunc(w, x, y):
@@ -80,7 +80,7 @@ def errorfunc(w, x, y):
     :return: binary classification error
     """
     x = x + [1]
-    return 0 if sum(w[i]*x[i] for i in range(5))*y > 0 else 1
+    return 0 if sum(w[i]*x[i] for i in range(d))*y > 0 else 1
 
 
 def euclidean1(temp):
@@ -103,9 +103,9 @@ def euclidean2(temp):
     :param temp: input vector
     :return: the Euclidean projection of the vector onto C for Scenario 2
     """
-    euclidean = sqrt(sum(temp[i] ** 2 for i in range(5)))
+    euclidean = sqrt(sum(temp[i] ** 2 for i in range(d)))
     if euclidean <= 1: return temp
-    else: return [temp[i] / euclidean for i in range(5)]
+    else: return [temp[i] / euclidean for i in range(d)]
 
 
 def sgd(euclidean, trainSet, n):
@@ -116,7 +116,7 @@ def sgd(euclidean, trainSet, n):
     :return: Ws
     """
     # initiation of w, w set, Ws
-    w, wset, Ws = [0, 0, 0, 0, 0], [[0, 0, 0, 0, 0]], []
+    w, wset, Ws = [0 for _ in range(d)], [[0 for _ in range(d)]], []
     # T iteration
     for i in range(n):
         # generate z and y
@@ -124,16 +124,16 @@ def sgd(euclidean, trainSet, n):
         y = trainSet[i][0]
         # the parameter of partial derivative with respect to each dimension
         # divides the quantity of that dimension
-        param = -y * np.exp(-y * sum(w[i]*z[i] for i in range(5))) \
-                / (1 + np.exp(-y * sum(w[i]*z[i] for i in range(5))))
+        param = -y * np.exp(-y * sum(w[i]*z[i] for i in range(d))) \
+                / (1 + np.exp(-y * sum(w[i]*z[i] for i in range(d))))
         # generate Gt
-        G = [param * z[i] for i in range(5)]
+        G = [param * z[i] for i in range(d)]
         # update w
-        temp = [w[i] - alpha * G[i] for i in range(5)]
+        temp = [w[i] - alpha * G[i] for i in range(d)]
         w = euclidean(temp)
         wset.append(w)
     # calculate Ws
-    for i in range(5):
+    for i in range(d):
         setIndex = 0
         for each in wset:
             setIndex += each[i]
@@ -173,13 +173,13 @@ if __name__ == "__main__":
         testSet1, testSet2 = generateSet1(testU), generateSet2(testU)
         loss_error_1set, loss_error_2set = [[], [], [], []], [[], [], [], []]
         # 30 trials
-        for _ in range(30):
+        for _ in range(trial):
             # generate Gaussian vector for train set
-            trainU = generateU(sigma, 1000)
+            trainU = generateU(sigma, ns[-1])
             # generate train set for each scenario
             trainSet1, trainSet2 = generateSet1(trainU), generateSet2(trainU)
             # n: 50, 100, 500, 1000
-            for i in range(4):
+            for i in range(len(ns)):
                 # run SGD algorithm
                 Ws1 = sgd(euclidean1, trainSet1[:ns[i]], ns[i])
                 Ws2 = sgd(euclidean2, trainSet2[:ns[i]], ns[i])
@@ -188,7 +188,7 @@ if __name__ == "__main__":
                 loss_error_2set[i].append(test(Ws2, testSet2))
         # for n = 50, 100, 500, 1000, calculate and print out:
         # Logistic loss(Mean, Std Dev, Min, Excess Risk) and Classification error(Mean, Std Dev)
-        for i in range(4):
+        for i in range(len(ns)):
             meanloss1 = mean(each[0] for each in loss_error_1set[i])
             stdloss1 = stdev(each[0] for each in loss_error_1set[i])
             minloss1 = min(each[0] for each in loss_error_1set[i])
