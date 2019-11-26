@@ -4,8 +4,8 @@ from math import sqrt
 from random import shuffle
 
 
-# sigma, n, N, iteration, alpha
-d, mu, sigmas, ns, N, trial, alpha = 5, [-.25, .25],[.05, .3], [50, 100, 500, 1000], 400, 30, 0.01
+# dimension, mu, sigma, n, N, iteration, alpha
+d, mu, sigmas, ns, N, trial, alpha = 5, [-.25, .25], [.05, .3], [50, 100, 500, 1000], 400, 30, 0.01
 
 
 def generateU(sigma, n):
