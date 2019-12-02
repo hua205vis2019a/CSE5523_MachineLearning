@@ -8,7 +8,7 @@ from random import shuffle
 d, mu, sigmas, ns, N, trial, alpha = 5, [-.25, .25], [.05, .3], [50, 100, 500, 1000], 400, 30, 0.01
 
 
-def generateU(sigma, n):
+def generate_u(sigma, n):
     """Generate n d-1 dimensional Gaussian vectors
     :param sigma: sigma of Gaussian distribution
     :param n: number of vectors('u')
@@ -23,7 +23,7 @@ def generateU(sigma, n):
     return uset
 
 
-def generateSet1(uset):
+def generate_set1(uset):
     """Euclidean projection of 'u' onto X for Scenario 1
     :param uset: Gaussian vectors('u')
     :return: train/test set
@@ -44,7 +44,7 @@ def generateSet1(uset):
     return trainSet
 
 
-def generateSet2(uset):
+def generate_set2(uset):
     """Euclidean projection of 'u' onto X for Scenario 2
     :param uset: Gaussian vectors('u')
     :return: train/test set
@@ -61,7 +61,7 @@ def generateSet2(uset):
     return trainSet
 
 
-def lossfunc(w, x, y):
+def loss_func(w, x, y):
     """Logistic loss function: ln(1 + exp(-y<w,x>))
     :param w: Ws
     :param x: test set
@@ -72,7 +72,7 @@ def lossfunc(w, x, y):
     return np.log(1 + np.exp(-y*sum(w[i]*x[i] for i in range(d))))
 
 
-def errorfunc(w, x, y):
+def error_func(w, x, y):
     """Binary classification error: 1(sign(<w,(x,1)>) != y)
     :param w: Ws
     :param x: test set
@@ -151,8 +151,8 @@ def test(w, testSet):
     for i, each in enumerate(testSet):
         x = each[1:]
         y = each[0]
-        lossSet.append(lossfunc(w, x, y))
-        errorSet.append(errorfunc(w, x, y))
+        lossSet.append(loss_func(w, x, y))
+        errorSet.append(error_func(w, x, y))
     # calculate the mean of loss and error
     loss, error = mean(lossSet), mean(errorSet)
     return [loss, error]
@@ -168,16 +168,16 @@ if __name__ == "__main__":
         print()
         print("sigma: ", sigma)
         # generate Gaussian vector for test set
-        testU = generateU(sigma, N)
+        testU = generate_u(sigma, N)
         # generate test set for each scenario
-        testSet1, testSet2 = generateSet1(testU), generateSet2(testU)
+        testSet1, testSet2 = generate_set1(testU), generate_set2(testU)
         loss_error_1set, loss_error_2set = [[], [], [], []], [[], [], [], []]
         # 30 trials
         for _ in range(trial):
             # generate Gaussian vector for train set
-            trainU = generateU(sigma, ns[-1])
+            trainU = generate_u(sigma, ns[-1])
             # generate train set for each scenario
-            trainSet1, trainSet2 = generateSet1(trainU), generateSet2(trainU)
+            trainSet1, trainSet2 = generate_set1(trainU), generate_set2(trainU)
             # n: 50, 100, 500, 1000
             for i in range(len(ns)):
                 # run SGD algorithm
